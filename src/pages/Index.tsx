@@ -134,6 +134,111 @@ const Index = () => {
           ]
         }
       ]
+    },
+    {
+      id: 'trade',
+      speaker: 'Торговый Магнат',
+      faction: 'federation',
+      text: 'Открылся новый торговый маршрут через нейтральную зону. Технократия предлагает автоматизацию, Федерация — свободную торговлю, Империя хочет установить контроль.',
+      choices: [
+        {
+          id: 'automate',
+          text: 'Внедрить автоматизированные системы Технократии',
+          impact: [
+            { factionId: 'technocracy', change: 18 },
+            { factionId: 'federation', change: 5 },
+            { factionId: 'imperium', change: -8 }
+          ]
+        },
+        {
+          id: 'free_trade',
+          text: 'Открыть свободную торговлю для всех',
+          impact: [
+            { factionId: 'federation', change: 18 },
+            { factionId: 'technocracy', change: -3 },
+            { factionId: 'imperium', change: -12 }
+          ]
+        },
+        {
+          id: 'control',
+          text: 'Установить военный контроль Империи',
+          impact: [
+            { factionId: 'imperium', change: 18 },
+            { factionId: 'federation', change: -18 },
+            { factionId: 'technocracy', change: -5 }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'crisis',
+      speaker: 'Командор Флота',
+      faction: 'imperium',
+      text: 'Неизвестная угроза приближается к границам галактики. Необходимо срочно принять решение о стратегии защиты.',
+      choices: [
+        {
+          id: 'ai_defense',
+          text: 'Запустить оборонную систему ИИ Технократии',
+          impact: [
+            { factionId: 'technocracy', change: 22 },
+            { factionId: 'federation', change: -8 },
+            { factionId: 'imperium', change: -5 }
+          ]
+        },
+        {
+          id: 'alliance',
+          text: 'Создать объединённый флот всех фракций',
+          impact: [
+            { factionId: 'federation', change: 22 },
+            { factionId: 'technocracy', change: 8 },
+            { factionId: 'imperium', change: 8 }
+          ]
+        },
+        {
+          id: 'preemptive',
+          text: 'Нанести упреждающий удар силами Империи',
+          impact: [
+            { factionId: 'imperium', change: 22 },
+            { factionId: 'federation', change: -20 },
+            { factionId: 'technocracy', change: 3 }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'discovery',
+      speaker: 'Главный Учёный',
+      faction: 'technocracy',
+      text: 'Технократия сделала революционное открытие в области энергии. Это может изменить баланс сил. Как распорядиться этой технологией?',
+      choices: [
+        {
+          id: 'monopoly',
+          text: 'Передать эксклюзивные права Технократии',
+          impact: [
+            { factionId: 'technocracy', change: 25 },
+            { factionId: 'federation', change: -15 },
+            { factionId: 'imperium', change: -12 }
+          ]
+        },
+        {
+          id: 'share',
+          text: 'Разделить технологию между всеми фракциями',
+          impact: [
+            { factionId: 'federation', change: 20 },
+            { factionId: 'technocracy', change: -10 },
+            { factionId: 'imperium', change: 5 }
+          ]
+        },
+        {
+          id: 'weaponize',
+          text: 'Использовать для создания нового оружия',
+          impact: [
+            { factionId: 'imperium', change: 25 },
+            { factionId: 'federation', change: -22 },
+            { factionId: 'technocracy', change: 8 }
+          ]
+        }
+      ]
     }
   ];
 
@@ -190,6 +295,29 @@ const Index = () => {
     return factions.reduce((prev, current) => 
       prev.influence > current.influence ? prev : current
     );
+  };
+
+  const getEnding = () => {
+    const winner = getWinningFaction();
+    const endings: Record<string, { title: string; description: string; icon: string }> = {
+      technocracy: {
+        title: 'Эра Технократии',
+        description: 'Галактика вступила в новую эпоху технологического прогресса. Искусственный интеллект и автоматизация принесли невиданное процветание, но некоторые опасаются потери человечности.',
+        icon: 'Cpu'
+      },
+      federation: {
+        title: 'Галактическое Единство',
+        description: 'Дипломатия восторжествовала. Все фракции объединились в мощный союз, где каждый голос имеет значение. Галактика живёт в мире и процветании.',
+        icon: 'Globe'
+      },
+      imperium: {
+        title: 'Имперский Порядок',
+        description: 'Сильная рука Империи установила порядок в галактике. Военная мощь обеспечивает безопасность, но свобода стала роскошью, которую могут позволить себе немногие.',
+        icon: 'Crown'
+      }
+    };
+
+    return endings[winner.id];
   };
 
   return (
@@ -307,32 +435,80 @@ const Index = () => {
 
         {currentStep >= dialogSteps.length && (
           <Card className="p-8 bg-card/90 backdrop-blur-md border-primary/30 text-center animate-scale-in">
-            <h2 className="text-3xl font-bold mb-4 text-primary">Эпилог</h2>
-            <p className="text-lg mb-4">
-              Ваши решения привели к доминированию фракции:
-            </p>
-            <div className="inline-block">
+            <div className="mb-6">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4"
+                style={{ 
+                  backgroundColor: `${getWinningFaction().color}30`,
+                  boxShadow: `0 0 40px ${getWinningFaction().color}60`
+                }}
+              >
+                <Icon name={getEnding().icon as any} size={40} style={{ color: getWinningFaction().color }} />
+              </div>
+            </div>
+            <h2 className="text-4xl font-bold mb-3" style={{ color: getWinningFaction().color }}>
+              {getEnding().title}
+            </h2>
+            <div className="inline-block mb-6">
               <Badge 
-                className="text-2xl py-3 px-6"
+                className="text-lg py-2 px-4"
                 style={{ 
                   backgroundColor: getWinningFaction().color,
                   color: '#0A0E27'
                 }}
               >
-                {getWinningFaction().name}
+                {getWinningFaction().name} — {getWinningFaction().influence}% влияния
               </Badge>
             </div>
-            <p className="mt-6 text-muted-foreground">
-              Влияние: {getWinningFaction().influence}%
+            <p className="text-lg text-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
+              {getEnding().description}
             </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              {factions.map((faction) => (
+                <div key={faction.id} className="text-center">
+                  <p className="text-sm text-muted-foreground mb-1">{faction.name}</p>
+                  <div className="text-2xl font-bold" style={{ color: faction.color }}>
+                    {faction.influence}%
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <Button
               onClick={() => {
                 setCurrentStep(0);
-                setFactions(factions.map(f => ({ ...f, influence: 50 })));
+                setFactions([
+                  {
+                    id: 'technocracy',
+                    name: 'Технократия Нексус',
+                    icon: 'Cpu',
+                    color: '#00D9FF',
+                    influence: 50,
+                    description: 'Передовые технологии и искусственный интеллект'
+                  },
+                  {
+                    id: 'federation',
+                    name: 'Галактическая Федерация',
+                    icon: 'Globe',
+                    color: '#9b87f5',
+                    influence: 50,
+                    description: 'Дипломатия и объединение народов'
+                  },
+                  {
+                    id: 'imperium',
+                    name: 'Звёздная Империя',
+                    icon: 'Crown',
+                    color: '#F97316',
+                    influence: 50,
+                    description: 'Военная мощь и экспансия'
+                  }
+                ]);
+                setSelectedChoice(null);
               }}
-              className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg"
             >
-              Начать заново
+              <Icon name="RotateCcw" size={20} className="mr-2" />
+              Начать новую историю
             </Button>
           </Card>
         )}
