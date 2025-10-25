@@ -59,6 +59,7 @@ const Index = () => {
     }
   ]);
 
+  const [gameStarted, setGameStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
@@ -320,6 +321,38 @@ const Index = () => {
     return endings[winner.id];
   };
 
+  const startGame = () => {
+    setGameStarted(true);
+    setCurrentStep(0);
+    setFactions([
+      {
+        id: 'technocracy',
+        name: 'Технократия Нексус',
+        icon: 'Cpu',
+        color: '#00D9FF',
+        influence: 50,
+        description: 'Передовые технологии и искусственный интеллект'
+      },
+      {
+        id: 'federation',
+        name: 'Галактическая Федерация',
+        icon: 'Globe',
+        color: '#9b87f5',
+        influence: 50,
+        description: 'Дипломатия и объединение народов'
+      },
+      {
+        id: 'imperium',
+        name: 'Звёздная Империя',
+        icon: 'Crown',
+        color: '#F97316',
+        influence: 50,
+        description: 'Военная мощь и экспансия'
+      }
+    ]);
+    setSelectedChoice(null);
+  };
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
@@ -336,6 +369,62 @@ const Index = () => {
         }} />
       </div>
 
+      {!gameStarted ? (
+        <div className="relative z-10 container mx-auto px-4 py-8 max-w-4xl min-h-screen flex flex-col items-center justify-center">
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-7xl font-bold mb-4 text-primary" style={{ textShadow: '0 0 30px rgba(0, 217, 255, 0.7)' }}>
+              ГАЛАКТИЧЕСКИЙ СОВЕТ
+            </h1>
+            <p className="text-muted-foreground text-2xl mb-2">Политическая стратегия</p>
+            <p className="text-foreground/70 text-lg">Ваши решения определяют судьбу цивилизаций</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 w-full">
+            {[
+              { name: 'Технократия Нексус', icon: 'Cpu', color: '#00D9FF', desc: 'Технологии и ИИ' },
+              { name: 'Галактическая Федерация', icon: 'Globe', color: '#9b87f5', desc: 'Дипломатия и мир' },
+              { name: 'Звёздная Империя', icon: 'Crown', color: '#F97316', desc: 'Военная мощь' }
+            ].map((faction, index) => (
+              <Card 
+                key={faction.name}
+                className="p-6 bg-card/60 backdrop-blur-sm border-2 text-center animate-scale-in hover:scale-105 transition-transform"
+                style={{ 
+                  borderColor: faction.color,
+                  animationDelay: `${index * 0.15}s`,
+                  boxShadow: `0 0 25px ${faction.color}30`
+                }}
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
+                  style={{ backgroundColor: `${faction.color}20` }}
+                >
+                  <Icon name={faction.icon as any} size={32} style={{ color: faction.color }} />
+                </div>
+                <h3 className="font-bold text-lg mb-2" style={{ color: faction.color }}>
+                  {faction.name}
+                </h3>
+                <p className="text-sm text-muted-foreground">{faction.desc}</p>
+              </Card>
+            ))}
+          </div>
+
+          <div className="space-y-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <Button
+              onClick={startGame}
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-6 text-xl font-bold animate-pulse-glow"
+            >
+              <Icon name="Play" size={24} className="mr-3" />
+              Начать игру
+            </Button>
+            
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                5 эпизодов • 3 уникальные концовки • Система влияния
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-5xl font-bold mb-2 text-primary" style={{ textShadow: '0 0 20px rgba(0, 217, 255, 0.5)' }}>
@@ -474,45 +563,27 @@ const Index = () => {
               ))}
             </div>
 
-            <Button
-              onClick={() => {
-                setCurrentStep(0);
-                setFactions([
-                  {
-                    id: 'technocracy',
-                    name: 'Технократия Нексус',
-                    icon: 'Cpu',
-                    color: '#00D9FF',
-                    influence: 50,
-                    description: 'Передовые технологии и искусственный интеллект'
-                  },
-                  {
-                    id: 'federation',
-                    name: 'Галактическая Федерация',
-                    icon: 'Globe',
-                    color: '#9b87f5',
-                    influence: 50,
-                    description: 'Дипломатия и объединение народов'
-                  },
-                  {
-                    id: 'imperium',
-                    name: 'Звёздная Империя',
-                    icon: 'Crown',
-                    color: '#F97316',
-                    influence: 50,
-                    description: 'Военная мощь и экспансия'
-                  }
-                ]);
-                setSelectedChoice(null);
-              }}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg"
-            >
-              <Icon name="RotateCcw" size={20} className="mr-2" />
-              Начать новую историю
-            </Button>
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={startGame}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg"
+              >
+                <Icon name="RotateCcw" size={20} className="mr-2" />
+                Начать новую историю
+              </Button>
+              <Button
+                onClick={() => setGameStarted(false)}
+                variant="outline"
+                className="border-primary/30 hover:bg-primary/10 px-8 py-3 text-lg"
+              >
+                <Icon name="Home" size={20} className="mr-2" />
+                Главное меню
+              </Button>
+            </div>
           </Card>
         )}
       </div>
+      )}
     </div>
   );
 };
